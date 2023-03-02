@@ -1,0 +1,9 @@
+{
+  "OnTestHook": {
+    "slugName": "OnTestHook_Slugged",
+    "category": "Testing",
+    "returnType": "void",
+    "funcName": "OnTestHook",
+    "arguementTypes": ["BasePlayer", "string"]
+  },
+}
