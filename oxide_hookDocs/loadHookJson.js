@@ -30,13 +30,14 @@ module.exports = async function prepareHooksForMarkdown() {
   let dirs = await readdir('./oxide_hookDocs/hooks/markdown');
 
   if (dirs.length > 0)
-    for (let hookExtra of dirs) {
+    for (let filename of dirs) {
       // if the filename is not a valid hook, skip it.
+      let hookExtra = filename.split('.md')[0].trim();
       if (!jsonData.hasOwnProperty(hookExtra)) continue;
 
       // read markdown file
       let rawMarkdown = await readFile(
-        path.combine('./oxide_hookDocs/hooks/markdown', hookExtra),
+        path.resolve('./oxide_hookDocs/hooks/markdown', filename),
         'utf-8'
       );
 
@@ -72,7 +73,7 @@ module.exports = async function prepareHooksForMarkdown() {
         // sectionContent = "Some Example Content";
 
         // add current section to the section array
-        if (!jsonData[hookExtra].HasOwnProperty('sections'))
+        if (!jsonData[hookExtra].hasOwnProperty('sections'))
           jsonData[hookExtra]['sections'] = {};
 
         jsonData[hookExtra]['sections'][sectionKey] = sectionContent;
