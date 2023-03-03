@@ -50,6 +50,22 @@ module.exports = async function jsonToMarkdown(hookData, hook) {
       : ''
   );
 
+  // determines the return behaviour message
+  let GetUsageReturn = () => {
+    if (getSection('usageReturnOverride') == '')
+      return getSection('usageReturnOverride');
+
+    if (isVoid) return '* No return behavior';
+
+    if (hookData.returnType.includes('bool'))
+      return '* Return true to allow or false to deny the Action';
+
+    if (hookData.returnType.includes('Item'))
+      return '* Return an Item to prevent default behavior & override the received Item';
+
+    return '* Return a non-null value to override default behavior';
+  };
+
   // construct main markdown body
   // dont move that line down, it breaks stuff apparently
   var markdown = `---
@@ -63,22 +79,11 @@ ${getSection('afterTitle')}
 
 ## Usage
 ${getSection('usageNotes')}
-* ${
-    getSection('usageReturnOverride') == ''
-      ? isVoid
-        ? 'No return behavior'
-        : hookData.returnType.includes('bool')
-        ? 'Return true to allow or false to deny the Action'
-        : hookData.returnType.includes('Item')
-        ? 'Return an Item to prevent default behavior & override the received Item'
-        : 'Return a non-null value to override default behavior'
-      : getSection('usageReturnOverride')
-  }
+${GetUsageReturn()}
 
 ${getSection('afterUsage')}
 
 ## Examples
-
 
 `;
   // trust me i hate that mess above just as much as you do
