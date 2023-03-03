@@ -1,20 +1,20 @@
 # docusaurus plugin to autogenerate oxide hook docs
 > this is only meant to serve as a proof of concept
-supply a json file to auto generate oxide hook documentation,
+supply a JSON file to auto generate oxide hook documentation,
 optionally supply markdown files to extend the documentation
 
 ## how it works
-the plugin works by wrapping the default docusaurus "docs" plugin, its only purpose is to collect the patcher's json file & any markdown files, combine them into a single json object and forward it to the markdown template. 
+the plugin works by wrapping the default docusaurus "docs" plugin, its only purpose is to collect the patcher's JSON file & any markdown files, combine them into a single JSON object and forward it to the markdown template. 
 
+## Quick-start
+for a quick way to test it out, go to stack blitz to get a setup test environment for free
+fork the setup version here ⇒ https://stackblitz.com/edit/github-xoofvf-4zcnzu?file=oxide_hookDocs/index.js
 
-## Quickstart
-for a quick way to test it out, go to stackblitz to get a pre-setup test environment for free
+### Step1
+Copy the oxide_hookDocs folder into docusaurus's root folder (not the src folder. The same root folder that holds the config file)
 
-### step1
-Copy the oxide_hookDocs folder into docusaurus's root folder (not the src folder. the same root folder that holds the config file)
-
-### step2
-add the plugin in docusaurus's config file. it uses the same configuration as the default docs plugin
+### Step2
+Add the plugin in docusaurus's config file. It uses the same configuration as the default docs plugin
 use the example below 
 ```js
   ...
@@ -42,22 +42,21 @@ use the example below
   ],
   ...
 ```
-NOTE: when using a preset (which the stackblitz setup is using) you need to make sure to set the docs in your preset settings to `false`, otherwise the plugins will conflict
+NOTE: When using a preset (which the stack blitz setup is using) you need to make sure to set the docs in your preset settings to `false`, otherwise the plugins will conflict
 
-### step3
-go to /oxide_hookDocs/hooks/patcherOutput.json and insert your json file
-see the one in this repo for a schema example
+### Step3
+Go to /oxide_hookDocs/hooks/patcherOutput.json and insert your JSON file
+see the one in this repo for a schema example.
 
-docusaurus will now build a documentation entry for every object in that json file when it gets built
+Docusaurus will now build a documentation entry for every object in that JSON file when it gets built.
 
-### step4 (optional)
-go to /oxide_hookDocs/hooks/markdown and add 1 or more markdown files named after the hook you want to extend documentation for
+### Step4 (optional)
+Go to /oxide_hookDocs/hooks/markdown and add 1 or more markdown files named after the hook you want to extend documentation for.
 
-to extend the documentation you can add 1 or more section
+To extend the documentation, you can add 1 or more sections.
 
-a section is some markdown content wrapped by some special HTML comments. Sections are identified by a specigic id. some sections have special places they get inserted to, while others will simply get appended at the bottom of the page
+A section is some markdown content wrapped by some special HTML comments. Sections are identified by a specific ID. some sections have special places they get inserted to, while others will simply get appended at the bottom of the page
 
-## modify the template
-before using this plugin, remember to adjust the template.js
-you should make sure to change 'defaultEditUrl' and 'customEditBase' to the relevant github links
-
+## Modify the Template
+Before using this plugin, remember to adjust the template.js
+you should make sure to change 'defaultEditUrl' and 'customEditBase' to the relevant GitHub links, but feel free to adjust the actual markdown that gets created
