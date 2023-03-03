@@ -1,4 +1,4 @@
-const { rmdir, writeFile, mkdir } = require('node:fs/promises');
+const { rm, writeFile, mkdir } = require('node:fs/promises');
 const path = require('path');
 
 const prepareHooksForMarkdown = require('./loadHookJson.js');
@@ -16,7 +16,7 @@ async function loadOxideHookDocumentation(context) {
   if (json != null) {
     // wipe docs/hooks folder to regenerate hook markdown
     let docDir = path.resolve(context.siteDir, 'docs', 'hooks');
-    await rmdir(docDir).catch((err) => {
+    await rm(docDir, { force: true, recursive: true }).catch((err) => {
       console.log('docs/hooks failed to get deleted');
     });
 
@@ -30,15 +30,13 @@ async function loadOxideHookDocumentation(context) {
       let category =
         hookData.category != 'undefined' ? hookData.category : 'miscellaneous';
       await mkdir(path.resolve(docDir, category), { recursive: true });
-
       // save markdown to a file in the docs/hooks/{category} folder, note the mdx extention to allow markdown & mdx formatting
       let routePath = path.resolve(
         docDir,
         category,
-        (hookData.slugName != 'undefined' ? hookData.slugName : hook) + '.mdx'
+        (hookData.slugName != undefined ? hookData.slugName : hook) + '.mdx'
       );
-      console.log(routePath);
-      await writeFile(routePath, markdown);
+      await writeFile(routePath, markdown).catch(console.error);
     }
   } else {
     console.error(
