@@ -1,5 +1,6 @@
 # docusaurus plugin to autogenerate oxide hook docs
 > this is only meant to serve as a proof of concept
+
 supply a JSON file to auto generate oxide hook documentation,
 optionally supply markdown files to extend the documentation
 
