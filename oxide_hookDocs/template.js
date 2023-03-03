@@ -4,7 +4,7 @@
 // category : string - the hook category, this is also present in the URL
 // returnType : string - the type the hook returns, used to determine the predefined text under Usage & return type in the code example
 // funcName : string - the function name in the code example
-// argumentTypes: array<string> -  a list of arguements used in the hook, types only at the moment
+// argumentTypes: array<string> -  a list of arguments used in the hook, types only at the moment
 // sections: object<string, string> - an object of sections from a custom markdown file, only present if atleast 1 section is present
 module.exports = async function jsonToMarkdown(hookData, hook) {
   const defaultEditUrl =
@@ -12,15 +12,8 @@ module.exports = async function jsonToMarkdown(hookData, hook) {
   const customEditBase =
     'https://github.com/OxideMod/base/folder/to/Markdown/files/'; // + {hook}.md
 
-  // shorthand checks
-  let isVoid = hookData.returnType == 'void';
-  let hasSections =
-    hookData.hasOwnProperty('sections') && Object.keys(hookData.sections) > 0;
-  let hasCustomFrontmatter =
-    hasSections && hookData.sections.hasOwnProperty('frontmatter');
-
   // a list of section types we check for, this prevents them from being appended again at the bottom
-  let standardSections = [
+  const standardSections = [
     'frontmatter',
     'afterTitle',
     'usageNotes',
@@ -29,29 +22,37 @@ module.exports = async function jsonToMarkdown(hookData, hook) {
     'codeExamples',
   ];
 
+  // shorthand checks
+  let isVoid = hookData.returnType == 'void';
+  let hasSections =
+    hookData.hasOwnProperty('sections') &&
+    Object.keys(hookData.sections).length > 0;
+
   let getSection = (key) => {
-    return hasSections && hookData.sections.hasOwnProperty(key)
-      ? hookData.sections[key]
-      : '';
+    if (!hasSections) return '';
+
+    return hookData.sections.hasOwnProperty(key) ? hookData.sections[key] : '';
   };
 
   // frontmatter defined as an object - the reason its an object is so we can check for overridden values if a frontmatter section is present in the custom markdown
   // https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs#markdown-front-matter
-  let defaultFrontmatter = {
+  const defaultFrontmatter = {
     hide_table_of_contents: true,
     custom_edit_url: hasSections
       ? customEditBase + hook + '.md'
       : defaultEditUrl,
   };
 
-  let frontmatterText = createFrontmatter(
+  var frontmatterText = createFrontmatter(
     defaultFrontmatter,
-    hasCustomFrontmatter ? hookData.sections.frontmatter : ''
+    hasSections && hookData.sections.hasOwnProperty('frontmatter')
+      ? hookData.sections.frontmatter
+      : ''
   );
 
   // construct main markdown body
   // dont move that line down, it breaks stuff apparently
-  let markdown = `---
+  var markdown = `---
 ${frontmatterText}
 ---
 
@@ -82,32 +83,21 @@ ${getSection('afterUsage')}
 `;
   // trust me i hate that mess above just as much as you do
 
-  // if no codeExamples section is found, generate a shitty default
-  if (getSection('codeExamples') == '') {
-    markdown += `
-\`\`\` csharp title="Basic example"
-private ${hookData.returnType} ${hookData.funcName} (${getFunctionArgsString(
-      hookData.arguementTypes
-    )})
-{
-  Puts("${hookData.funcName} Works!");
-
-  return${isVoid ? '' : ' null'};
-}
-\`\`\`
-`;
-  } else {
-    // otherwise add the codeExamples string as is to the markdown
+  // add codeExamples if the section exists
+  if (getSection('codeExamples') != '') {
     markdown += `${getSection('codeExamples')} \n`;
+  } else {
+    // generate shitty default
+    markdown += createCodeExample(hookData);
   }
 
   // check if there are any other sections that weren't one of the standard ones and simply append them
   if (hasSections)
-    for (let [secKey, content] of Object.entries(hookData.sections)) {
+    for (let [secKey, seccontent] of Object.entries(hookData.sections)) {
       // section was already included in the markdown
       if (standardSections.includes(secKey)) continue;
 
-      markdown += `${content} \n`;
+      markdown += `${seccontent} \n`;
     }
 
   return markdown;
@@ -146,17 +136,36 @@ function createFrontmatter(options, customText, isNested = false) {
   return customText;
 }
 
+// create text example of hook wrapped in backticks
+function createCodeExample(data) {
+  let codeResult = `
+  \`\`\` csharp title="Basic example"
+  private ${data.returnType} ${data.funcName} (${getFunctionArgsString(
+    data.argumentTypes
+  )})
+  {
+    Puts("${data.funcName} Works!");
+  
+    return${data.returnType.includes('void') ? '' : ' null'};
+  }
+  \`\`\`
+  `;
+  return codeResult;
+}
+
+// format string array into function args
 function getFunctionArgsString(args) {
   let usedArgNames = [];
   let result = '';
   for (let arg of args) {
-    // set arguement name to lowercase version of the type
+    // ensure first leter of the varname is lowercase
     let lowered = arg.charAt(0).toLowerCase() + arg.slice(1);
-    let varname = lowered;
-    // if the type string was already lowercase or there's already an arguement with the name, add an incrementing number to the variable name
-    while (varname == arg || usedArgNames.includes(varname)) {
-      let i = 1;
+    var varname = lowered;
+    // if the type string was already lowercase or there's already an argument with the name, add an incrementing number to the variable name
+    let i = 1;
+    while (varname === arg || usedArgNames.includes(varname)) {
       varname = `${lowered}${i++}`;
+      if (i >= 10) break;
     }
     usedArgNames.push(varname);
     // add Type & varname to the result string, prefixing a comma and space if its not empty
