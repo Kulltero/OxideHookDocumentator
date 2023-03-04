@@ -52,7 +52,7 @@ module.exports = async function jsonToMarkdown(hookData, hook) {
 
   // determines the return behaviour message
   let GetUsageReturn = () => {
-    if (getSection('usageReturnOverride') == '')
+    if (getSection('usageReturnOverride') != '')
       return getSection('usageReturnOverride');
 
     if (isVoid) return '* No return behavior';
